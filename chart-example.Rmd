@@ -1,0 +1,147 @@
+---
+title: "R Chart Example with Multiple Libraries"
+author: "Jane Adams"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    fig_width: 12
+    fig_height: 4
+---
+
+# Setup
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(plotly)
+library(lattice)
+library(gridExtra)
+library(ggplot2)
+library(Cairo)
+```
+
+# Create Random Data to Visualize
+
+```{r data-generation}
+set.seed(0)
+N <- 100
+D <- c('A', 'B', 'C')
+df <- tibble(
+  c1 = runif(N),
+  c2 = runif(N),
+  d1 = sample(D, N, replace = TRUE),
+  d2 = sample(D, N, replace = TRUE)
+)
+agg_df <- df %>% group_by(d1) %>% summarise(c1 = mean(c1))
+pivot <- table(df$d1, df$d2)
+```
+
+# ggplot2 Visualizations
+
+```{r ggplot2-plots, fig.width=12, fig.height=4}
+if (!dir.exists("plots")) dir.create("plots")
+p1 <- ggplot(df, aes(x = c1, y = c2, color = d1)) +
+  geom_point(size = 3, alpha = 0.8) +
+  ggtitle("Continuous-Continuous") +
+  theme_minimal()
+
+p2 <- ggplot(agg_df, aes(x = d1, y = c1, fill = d1)) +
+  geom_col() +
+  ggtitle("Continuous-Discrete") +
+  theme_minimal()
+
+p3 <- ggplot(as.data.frame(pivot), aes(Var1, Var2, fill = Freq)) +
+  geom_tile() +
+  scale_fill_viridis_c() +
+  ggtitle("Discrete-Discrete") +
+  labs(x = "d1", y = "d2") +
+  theme_minimal()
+
+gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+# Save ggplot2 plots to SVG using Cairo
+```{r save-ggplot2-svg, echo=FALSE, message=FALSE, warning=FALSE}
+Cairo::CairoSVG(file = "plots/ggplot.svg", width = 12, height = 4)
+print(gridExtra::grid.arrange(p1, p2, p3, ncol = 3))
+dev.off()
+message("SVG file saved to plots/ggplot.svg")
+```
+
+# Plotly Visualizations
+
+```{r plotly-plots, eval=interactive()}
+p1 <- plot_ly(df, x = ~c1, y = ~c2, color = ~d1, type = 'scatter', mode = 'markers') %>%
+  layout(title = "Continuous-Continuous")
+p2 <- plot_ly(agg_df, x = ~d1, y = ~c1, color = ~d1, type = 'bar') %>%
+  layout(title = "Continuous-Discrete")
+p3 <- plot_ly(z = ~pivot, x = colnames(pivot), y = rownames(pivot), type = "heatmap", colors = "viridis") %>%
+  layout(title = "Discrete-Discrete")
+
+subplot(p1, p2, p3, nrows = 1, margin = 0.05, titleX = TRUE, titleY = TRUE) %>%
+  layout(width = 1400, height = 400)
+```
+
+# Save plotly plots to SVG using Kaleido
+```{r save-plotly-svg, echo=FALSE, message=FALSE, warning=FALSE}
+subplot_obj <- subplot(p1, p2, p3, nrows = 1, margin = 0.05, titleX = TRUE, titleY = TRUE)
+plotly::save_image(subplot_obj, file = "plots/R-plotly.svg", engine = "kaleido")
+message("SVG file saved to plots/R-plotly.svg")
+```
+
+# Lattice Visualizations
+
+```{r lattice-plots, fig.width=12, fig.height=4}
+p1 <- xyplot(c2 ~ c1, data = df, groups = d1, auto.key = TRUE, main = "Continuous-Continuous")
+p2 <- barchart(c1 ~ d1, data = agg_df, groups = d1, main = "Continuous-Discrete")
+p3 <- levelplot(pivot, main = "Discrete-Discrete", xlab = "d2", ylab = "d1", col.regions = viridisLite::viridis(100))
+gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
+```
+
+# Save lattice plots to SVG using Cairo
+```{r save-lattice-svg, echo=FALSE, message=FALSE, warning=FALSE}
+Cairo::CairoSVG(file = "plots/lattice.svg", width = 12, height = 4)
+gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
+dev.off()
+message("SVG file saved to plots/lattice.svg")
+```
+
+# Base R Visualizations
+
+```{r base-plots, fig.width=12, fig.height=4}
+par(mfrow = c(1, 3))
+# Continuous-Continuous
+plot(df$c1, df$c2, col = as.numeric(factor(df$d1)), pch = 19, main = "Continuous-Continuous", xlab = "c1", ylab = "c2")
+legend("topright", legend = levels(factor(df$d1)), col = 1:3, pch = 19)
+# Continuous-Discrete
+barplot(agg_df$c1, names.arg = agg_df$d1, col = 1:3, main = "Continuous-Discrete", ylab = "mean(c1)")
+# Discrete-Discrete
+image(1:3, 1:3, t(pivot)[,3:1], col = viridisLite::viridis(100), axes = FALSE, main = "Discrete-Discrete", xlab = "d2", ylab = "d1")
+axis(1, at = 1:3, labels = colnames(pivot))
+axis(2, at = 1:3, labels = rev(rownames(pivot)))
+par(mfrow = c(1, 1))
+```
+
+# Save base R plots to SVG using Cairo
+```{r save-base-svg, echo=FALSE, message=FALSE, warning=FALSE}
+Cairo::CairoSVG(file = "plots/base.svg", width = 12, height = 4)
+par(mfrow = c(1, 3))
+# Continuous-Continuous
+plot(df$c1, df$c2, col = as.numeric(factor(df$d1)), pch = 19, main = "Continuous-Continuous", xlab = "c1", ylab = "c2")
+legend("topright", legend = levels(factor(df$d1)), col = 1:3, pch = 19)
+# Continuous-Discrete
+barplot(agg_df$c1, names.arg = agg_df$d1, col = 1:3, main = "Continuous-Discrete", ylab = "mean(c1)")
+# Discrete-Discrete
+image(1:3, 1:3, t(pivot)[,3:1], col = viridisLite::viridis(100), axes = FALSE, main = "Discrete-Discrete", xlab = "d2", ylab = "d1")
+axis(1, at = 1:3, labels = colnames(pivot))
+axis(2, at = 1:3, labels = rev(rownames(pivot)))
+par(mfrow = c(1, 1))
+dev.off()
+message("SVG file saved to plots/base.svg")
+```
+
+---
+
+This document demonstrates how to create and compare charts using multiple R libraries: ggplot2, plotly, lattice, and base R. Each section generates three types of plots: continuous-continuous, continuous-discrete, and discrete-discrete.
