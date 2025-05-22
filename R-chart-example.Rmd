@@ -94,7 +94,7 @@ subplot(p1, p2, p3, nrows = 1, margin = 0.05, titleX = TRUE, titleY = TRUE) %>%
 # Save plotly plots to SVG using Kaleido
 ```{r save-plotly-svg, echo=FALSE, message=FALSE, warning=FALSE}
 subplot_obj <- subplot(p1, p2, p3, nrows = 1, margin = 0.05, titleX = TRUE, titleY = TRUE)
-plotly::save_image(subplot_obj, file = "plots/R-plotly.svg", engine = "kaleido")
+plotly::save_image(subplot_obj, file = "plots/R-plotly.svg", engine = "kaleido", width = 1200, height = 400)
 message("SVG file saved to plots/R-plotly.svg")
 ```
 
