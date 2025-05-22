@@ -70,6 +70,13 @@ dev.off()
 message("SVG file saved to plots/ggplot.svg")
 ```
 
+# Save ggplot2 plots to SVG using svglite
+```{r save-ggplot2-svg-svglite, echo=FALSE, message=FALSE, warning=FALSE}
+svglite::svglite("plots/ggplot.svg", width = 12, height = 4)
+gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
+dev.off()
+```
+
 # Plotly Visualizations
 
 ```{r plotly-plots, eval=interactive()}
