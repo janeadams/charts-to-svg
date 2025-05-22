@@ -101,15 +101,26 @@ message("SVG file saved to plots/R-plotly.svg")
 # Lattice Visualizations
 
 ```{r lattice-plots, fig.width=12, fig.height=4}
-p1 <- xyplot(c2 ~ c1, data = df, groups = d1, auto.key = TRUE, main = "Continuous-Continuous")
-p2 <- barchart(c1 ~ d1, data = agg_df, groups = d1, main = "Continuous-Discrete")
-p3 <- levelplot(pivot, main = "Discrete-Discrete", xlab = "d2", ylab = "d1", col.regions = viridisLite::viridis(100))
+p1 <- xyplot(c2 ~ c1, data = df, groups = d1, auto.key = TRUE, main = "Continuous-Continuous",
+             par.settings = list(background = list(col = "white")))
+p2 <- barchart(c1 ~ d1, data = agg_df, groups = d1, main = "Continuous-Discrete",
+               par.settings = list(background = list(col = "white")))
+p3 <- levelplot(pivot, main = "Discrete-Discrete", xlab = "d2", ylab = "d1",
+                col.regions = viridisLite::viridis(100),
+                par.settings = list(background = list(col = "white")))
 gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
 ```
 
 # Save lattice plots to SVG using Cairo
 ```{r save-lattice-svg, echo=FALSE, message=FALSE, warning=FALSE}
 Cairo::CairoSVG(file = "plots/lattice.svg", width = 12, height = 4)
+p1 <- xyplot(c2 ~ c1, data = df, groups = d1, auto.key = TRUE, main = "Continuous-Continuous",
+             par.settings = list(background = list(col = "white")))
+p2 <- barchart(c1 ~ d1, data = agg_df, groups = d1, main = "Continuous-Discrete",
+               par.settings = list(background = list(col = "white")))
+p3 <- levelplot(pivot, main = "Discrete-Discrete", xlab = "d2", ylab = "d1",
+                col.regions = viridisLite::viridis(100),
+                par.settings = list(background = list(col = "white")))
 gridExtra::grid.arrange(p1, p2, p3, ncol = 3)
 dev.off()
 message("SVG file saved to plots/lattice.svg")
@@ -118,6 +129,7 @@ message("SVG file saved to plots/lattice.svg")
 # Base R Visualizations
 
 ```{r base-plots, fig.width=12, fig.height=4}
+par(bg = "white")
 par(mfrow = c(1, 3))
 # Continuous-Continuous
 plot(df$c1, df$c2, col = as.numeric(factor(df$d1)), pch = 19, main = "Continuous-Continuous", xlab = "c1", ylab = "c2")
@@ -133,7 +145,8 @@ par(mfrow = c(1, 1))
 
 # Save base R plots to SVG using Cairo
 ```{r save-base-svg, echo=FALSE, message=FALSE, warning=FALSE}
-Cairo::CairoSVG(file = "plots/base.svg", width = 12, height = 4)
+Cairo::CairoSVG(file = "plots/base.svg", width = 12, height = 4, bg = "white")
+par(bg = "white")
 par(mfrow = c(1, 3))
 # Continuous-Continuous
 plot(df$c1, df$c2, col = as.numeric(factor(df$d1)), pch = 19, main = "Continuous-Continuous", xlab = "c1", ylab = "c2")
