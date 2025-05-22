@@ -17,10 +17,10 @@ For a demo of pulling SVG charts produced with various libraries in Python and R
 ![](plots/ggplot.svg)
 
 ## R Plotly
-![](plots/R-plotly.svg)
+![](plots/R-plotly.svg?)
 
 ## Lattice
-![](plots/lattice.svg)
+![](plots/lattice.svg?)
 
 ## Base R
-![](plots/base.svg)
+![](plots/base.svg?)
